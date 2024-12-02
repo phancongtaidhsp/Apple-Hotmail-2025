@@ -1,5 +1,5 @@
-const RegisterYahoo = async (page, record) => {
-  const [mail, phone, firstName, lastName, birtdate] = record;
+const RegisterYahooStep1 = async (page, record) => {
+  const [mail, firstName, lastName, birtdate] = record;
   try {
     await page.bringToFront();
 
@@ -17,7 +17,9 @@ const RegisterYahoo = async (page, record) => {
 
     await page.waitFor(500);
 
-    await page.type('#usernamereg-userId', mail, { delay: 30 });
+    let mailType = mail.includes("@") ? mail.split("@")?.[0] : mail;
+
+    await page.type('#usernamereg-userId', mailType, { delay: 30 });
 
     await page.waitFor(500);
 
@@ -41,11 +43,13 @@ const RegisterYahoo = async (page, record) => {
 
     await page.click('#reg-submit-button');
 
-    return Promise.resolve([mail, phone, "pass"]);
+    await page.waitForSelector('#usernamereg-phone');
+
+    return Promise.resolve([mail, "pass"]);
   } catch (error) {
     console.log(error);
-    return Promise.resolve([mail, phone, "fail"]);
+    return Promise.resolve([mail, "fail"]);
   }
 
 };
-module.exports = RegisterYahoo;
+module.exports = RegisterYahooStep1;

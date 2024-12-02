@@ -57,6 +57,7 @@
     function showThongBao(type, message, isTimeout) {
       document.getElementById('thongbao').innerText = message;
       document.getElementById('thongbao').className = `alert ${type}`;
+      document.getElementById('thongbao').classList.remove('hidden')
       if (!isTimeout) {
         setTimeout(() => document.getElementById('thongbao').classList.add('hidden'), 3000);
       }
@@ -118,19 +119,19 @@
     ipcRenderer.on('checkfiles', function (e, filename) {
       showThongBao('alert-danger', `Đường dẫn file không hợp lệ: ${filename}`)
     })
-    ipcRenderer.on('info', function (e, info, noTimeout) {
+    ipcRenderer.on('pause', function (e, info, noTimeout) {
       showThongBao('alert-info', info, noTimeout)
       let failStep = parseInt(document.getElementById(`die`).innerText);
       let successStep = parseInt(document.getElementById(`live`).innerText);
       let totalStep = parseInt(document.getElementById(`total`).innerText);
-      if (pause && failStep + successStep === totalStep) {
+      if (failStep + successStep === totalStep) {
         document.getElementById('thongbao').classList.add('hidden')
       } else {
         document.getElementById('start').disabled = isDisable;
       }
     })
-    ipcRenderer.on('loi', function (e, err) {
-      showThongBao('alert-danger', err)
+    ipcRenderer.on('loi', function (e, err, noTimeout) {
+      showThongBao('alert-danger', err, noTimeout)
     })
 
   </script>
