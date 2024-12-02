@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Hotmail - Login (2024. v1)</title>
+  <title>Apple - Yahoo (2024. v1)</title>
   <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
   <link rel="stylesheet" href="style.css">
@@ -11,39 +11,126 @@
 </head>
 
 <body>
-  <h1 class="title-app">Hotmail - Login (2024. v1)</h1>
+  <h1 class="title-app">Apple - Yahoo (2024. v1)</h1>
   <div id="thongbao" class="alert alert-success hidden" role="alert">
     Đã chạy xong file data
   </div>
   <div class="wr">
     <button id="start" type="button" class="button btn btn-primary">Start</button>
-    <button id="reset" class="button btn btn-warning">Tắt trình duyệt</button>
-    <div class="row">
-      <div class="col">
-        <textarea class="textarea" id="datatext" name="datatext" rows="5" cols="70" placeholder="Nhập data"></textarea>
+    <button id="pause" type="button" class="button btn btn-danger">Pause</button>
+    <div class="value">
+      <input type="input" id="filepathmail" placeholder="Đường dẫn file mail">
+      <input type="input" id="filepathproxy" placeholder="Đường dẫn file proxy">
+      <input type="input" id="thread" placeholder="Số luồng">
+    </div>
+    <div class="value">
+      <input type="input" id="keycaptcha" placeholder="Key 2captcha">
+    </div>
+    <div class="value">
+      <div class="total">
+        <span>Time: </span>
+        <span id="time">0s</span>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <textarea class="textarea" id="proxytext" name="proxytext" rows="5" cols="70" placeholder="Nhập proxy"></textarea>
+    <div class="value">
+      <div class="success">
+        <span>Success: </span>
+        <span id="live">0</span>
+      </div>
+      <div class="fail">
+        <span>Fail: </span>
+        <span id="die">0</span>
+      </div>
+      <div class="total">
+        <span>Total: </span>
+        <span id="total">0</span>
       </div>
     </div>
   </div>
   <ul class="info">
-    <li>Nhập tối đa 5 dòng data/proxy</li>
-    <li>data format theo mail|pass</li>
+    <li>file data format theo 'mail'|'pass'</li>
   </ul>
   <script>
     require('./app.js');
     const electron = require('electron');
     const { ipcRenderer } = electron;
-    function showThongBao(type, message) {
+    function showThongBao(type, message, isTimeout) {
       document.getElementById('thongbao').innerText = message;
       document.getElementById('thongbao').className = `alert ${type}`;
-      setTimeout(() => document.getElementById('thongbao').classList.add('hidden'), 3000);
+      if (!isTimeout) {
+        setTimeout(() => document.getElementById('thongbao').classList.add('hidden'), 3000);
+      }
     }
-    ipcRenderer.on('failProxyKey', function (e, number) {
-      showThongBao('alert-danger', `proxy key ${number} không hợp lệ`)
+    ipcRenderer.on('total', function (e, total) {
+      document.getElementById(`total`).innerText = total;
+    })
+    ipcRenderer.on('fail', function (e, step, pause) {
+      let failStep = parseInt(document.getElementById(`die`).innerText) + step;
+      let successStep = parseInt(document.getElementById(`live`).innerText);
+      let totalStep = parseInt(document.getElementById(`total`).innerText);
+      document.getElementById(`die`).innerText = failStep;
+      if (pause && failStep + successStep === totalStep) {
+        document.getElementById('thongbao').classList.add('hidden')
+        document.getElementById('start').disabled = false;
+      } else if(!pause &&failStep + successStep === totalStep) {
+        showThongBao('alert-success', 'Đã chạy hết file data')
+      }
+    })
+    ipcRenderer.on('success', function (e, step, pause) {
+      let failStep = parseInt(document.getElementById(`die`).innerText);
+      let successStep = parseInt(document.getElementById(`live`).innerText) + step;
+      let totalStep = parseInt(document.getElementById(`total`).innerText);
+      document.getElementById(`live`).innerText = successStep;
+      if (pause && failStep + successStep === totalStep) {
+        document.getElementById('thongbao').classList.add('hidden')
+        document.getElementById('start').disabled = false;
+      } else if(!pause &&failStep + successStep === totalStep) {
+        showThongBao('alert-success', 'Đã chạy hết file data')
+      }
+    })
+    ipcRenderer.on('disable', function (e, isDisable) {
+      document.getElementById('start').disabled = isDisable;
+    })
+    ipcRenderer.on('time', function (e, time) {
+      let h, m, s
+      if (time / 3600 >= 1) {
+        h = Math.floor(time / 3600);
+        s = time % 3600;
+        m = 0;
+        if (s / 60 >= 1) {
+          m = Math.floor(s / 60);
+          s = s % 60;
+        }
+        document.getElementById(`time`).innerText = `${h}h${m}m${s}s`
+      } else if (time / 60 >= 1) {
+        m = Math.floor(time / 60)
+        s = time % 60
+        document.getElementById(`time`).innerText = `0h${m}m${s}s`
+      } else {
+        document.getElementById(`time`).innerText = `0h0m${time}s`
+      }
+    })
+    ipcRenderer.on('done', function (e, isDone) {
+      if (isDone) {
+        showThongBao('alert-success', 'Đã chạy hết file data')
+      }
+    })
+    ipcRenderer.on('checkfiles', function (e, filename) {
+      showThongBao('alert-danger', `Đường dẫn file không hợp lệ: ${filename}`)
+    })
+    ipcRenderer.on('info', function (e, info, noTimeout) {
+      showThongBao('alert-info', info, noTimeout)
+      let failStep = parseInt(document.getElementById(`die`).innerText);
+      let successStep = parseInt(document.getElementById(`live`).innerText);
+      let totalStep = parseInt(document.getElementById(`total`).innerText);
+      if (pause && failStep + successStep === totalStep) {
+        document.getElementById('thongbao').classList.add('hidden')
+      } else {
+        document.getElementById('start').disabled = isDisable;
+      }
+    })
+    ipcRenderer.on('loi', function (e, err) {
+      showThongBao('alert-danger', err)
     })
 
   </script>

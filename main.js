@@ -9,8 +9,9 @@ puppeteer.use(StealthPlugin());
 
 const Action = require('./Action');
 
-let flagStop = false;
+let flagPause = false;
 let win;
+let interval;
 
 function createWindow() {
   // Create the browser window.
@@ -37,7 +38,7 @@ app.on('window-all-closed', () => {
   }
 })
 
-const run = async function (thread, proxy) {
+const run = async function (thread, proxy, mailpass, keycaptcha) {
   let browser = null;
   let page = null;
   let position = {
@@ -59,10 +60,16 @@ const run = async function (thread, proxy) {
       x: 800,
       y: 500
     }
+  } else if (thread === '5') {
+    position = {
+      x: 400,
+      y: 250
+    }
   }
+  
   browser = await puppeteer.launch({
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    // executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     headless: false,
     ignoreHTTPSErrors: true,
     ignoreDefaultArgs: ['--enable-automation'],
@@ -82,10 +89,17 @@ const run = async function (thread, proxy) {
 
 ipc.on('start', async function (event, dataText, proxyKeyText) {
   electron.session.defaultSession.clearCache();
-  flagStop = false;
+  flagPause = false;
+  interval = setInterval(() => {
+    startTime++;
+    win.webContents.send('time', startTime);
+  }, 1000);
 })
 
-ipc.on('stop', function (event) {
-  flagStop = true;
-  win.webContents.send('step', 0);
+ipc.on('pause', async function (event) {
+  flagPause = true;
+  if (interval) {
+    clearInterval(interval)
+  }
+  win.webContents.send('info', "Đang tạm dừng...Vui lòng chờ...", true);
 })

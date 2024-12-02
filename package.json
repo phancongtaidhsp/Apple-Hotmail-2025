@@ -11,13 +11,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.5.5",
+    "electron": "^11.0.0",
     "electron-builder": "^22.5.1",
     "electron-rebuild": "^2.0.1"
   },
   "build": {
-    "appId": "com.hotmail-login.app",
-    "productName": "Hotmail - Login (2024. v1)",
+    "appId": "com.apple.yahoo.app",
+    "productName": "Apple - Yahoo (2024. v1)",
     "target": "nsis",
     "nsis": {
       "allowToChangeInstallationDirectory": true,
