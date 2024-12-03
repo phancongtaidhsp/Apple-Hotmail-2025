@@ -1,4 +1,4 @@
-const RegisterYahooStep1 = async (page, record) => {
+const RegisterYahooStep1 = async (thread, page, record) => {
   const [mail, firstName, lastName, birtdate] = record;
   try {
     await page.bringToFront();
@@ -45,10 +45,10 @@ const RegisterYahooStep1 = async (page, record) => {
 
     await page.waitForSelector('#usernamereg-phone');
 
-    return Promise.resolve([mail, "pass"]);
+    return Promise.resolve([thread, mail, "pass"]);
   } catch (error) {
     console.log(error);
-    return Promise.resolve([mail, "fail"]);
+    return Promise.resolve([thread, mail, "fail"]);
   }
 
 };

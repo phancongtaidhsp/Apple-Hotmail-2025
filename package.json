@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.2.0",
-    "2captcha": "^3.0.5-2",
     "axios-https-proxy-fix": "^0.17.1",
     "child_process": "^1.0.2",
     "fs-extra": "^9.0.0",
