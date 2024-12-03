@@ -9,7 +9,6 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
 puppeteer.use(StealthPlugin());
 
-const Action = require('./Action');
 const { chunk, sampleSize } = require('lodash');
 const RegisterYahooStep1 = require('./RegisterYahooStep1');
 const { randomFirstName, randomLastName, randomBirthdate, checkProxyStatus, getBalanceDaisySMS, getBalance2Captcha, rentPhoneDaisySMS } = require('./helper');
@@ -51,7 +50,8 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
       provider: {
         id: '2captcha',
         token: keyCaptcha
-      }
+      },
+      visualFeedback: true
     })
   );
   let out = `${__dirname}\\..\\extraResources\\output.txt`;
@@ -89,8 +89,8 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
     }
 
     browsers[thread] = await puppeteer.launch({
-      // executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-      executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: false,
       ignoreHTTPSErrors: true,
       ignoreDefaultArgs: ['--enable-automation'],
@@ -99,6 +99,18 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
         '--disk-cache-size=0',
         '--ignore-certifcate-errors',
         '--ignore-certifcate-errors-spki-list',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process,SitePerProcess',
+        '--flag-switches-begin --disable-site-isolation-trials --flag-switches-end',
+        '--aggressive-cache-discard',
+        '--disable-cache',
+        '--disable-application-cache',
+        '--disable-offline-load-stale-cache',
+        '--disable-gpu-shader-disk-cache',
+        '--media-cache-size=0',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
         `--proxy-server=${proxyChunk[thread]}`
       ],
     });

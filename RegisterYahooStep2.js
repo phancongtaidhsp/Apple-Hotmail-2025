@@ -21,25 +21,39 @@ const RegisterYahooStep2 = async (thread, page, record) => {
       page.waitForSelector('#verification-code-field')
     ])
 
-    await page.waitFor(1000);
+    await page.waitFor(15000);
 
-    if (await page.$('#recaptcha-iframe')) {
-      console.log("start...")
-      const frames = await page.frames();
-      console.log("frames..");
-      console.log(frames);
-      const iFrame1 = frames.find(f => f.name() === 'recaptcha-iframe');
-      console.log(iFrame1);
-      await iFrame1.waitForSelector('#recaptchaForm');
-      await iFrame1.waitForSelector('#recaptchaForm #recaptcha-submit');
-      await iFrame1.waitFor(1000);
-      await page.waitFor(3000);
-      console.log("giai captcha...");
-      await page.solveRecaptchas();
-      console.log("giai xong...");
-      await iFrame1.waitFor(1000);
-      await iFrame1.click('#recaptcha-submit');
+    for (const frame of page.mainFrame().childFrames()) {
+      const {
+        captchas,
+        filtered,
+        solutions,
+        solved,
+        error
+      } = await frame.solveRecaptchas();
+      console.log(captchas,
+        filtered,
+        solutions,
+        solved,
+        error);
     }
+
+    // let frameHandle = await page.$("#recaptcha-iframe");
+
+    // if (frameHandle) {
+    //   console.log("start...")
+    //   console.log(frameHandle);
+    //   let iFrame = await frameHandle.contentFrame();
+    //   await iFrame.waitForSelector('#recaptchaForm #recaptcha-submit');
+    //   await iFrame.waitFor(3000);
+    //   console.log("giai captcha...");
+    //   for (const frame of page.mainFrame().childFrames()) {
+    //     await frame.solveRecaptchas();
+    //   }
+    //   console.log("giai xong...");
+    //   await page.waitFor(1000);
+    //   // await iFrame.click('#recaptchaForm #recaptcha-submit');
+    // }
     console.log("ra ngoai");
     await page.waitForSelector('#verification-code-field');
 
