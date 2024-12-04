@@ -21,22 +21,7 @@ const RegisterYahooStep2 = async (thread, page, record) => {
       page.waitForSelector('#verification-code-field')
     ])
 
-    await page.waitFor(15000);
-
-    for (const frame of page.mainFrame().childFrames()) {
-      const {
-        captchas,
-        filtered,
-        solutions,
-        solved,
-        error
-      } = await frame.solveRecaptchas();
-      console.log(captchas,
-        filtered,
-        solutions,
-        solved,
-        error);
-    }
+    await page.waitFor(999999);
 
     // let frameHandle = await page.$("#recaptcha-iframe");
 

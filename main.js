@@ -45,15 +45,15 @@ app.on('window-all-closed', () => {
 })
 
 const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) {
-  puppeteer.use(
-    RecaptchaPlugin({
-      provider: {
-        id: '2captcha',
-        token: keyCaptcha
-      },
-      visualFeedback: true
-    })
-  );
+  // puppeteer.use(
+  //   RecaptchaPlugin({
+  //     provider: {
+  //       id: '2captcha',
+  //       token: keyCaptcha
+  //     },
+  //     visualFeedback: true
+  //   })
+  // );
   let out = `${__dirname}\\..\\extraResources\\output.txt`;
   let promises = Array(mailPassChunk.length).fill(null);
   let browsers = Array(mailPassChunk.length).fill(null);
@@ -87,14 +87,16 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
         y: 0
       }
     }
-
+    let stayFocusd = "C:\\Users\\USER\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\infdcenbdoibcacogknkjleclhnjdmfh\\1.0.2_0";
     browsers[thread] = await puppeteer.launch({
       executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
       // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: false,
       ignoreHTTPSErrors: true,
-      ignoreDefaultArgs: ['--enable-automation'],
+      ignoreDefaultArgs: ['--enable-automation', '--disable-extensions'],
       args: [`--window-size=500,600`, `--window-position=${position.x},${position.y}`,
+        `--disable-extensions-except=${stayFocusd}`, 
+        `--load-extension=${stayFocusd}`,
         '--disable-infobars',
         '--disk-cache-size=0',
         '--ignore-certifcate-errors',
@@ -109,6 +111,7 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
         '--disable-gpu-shader-disk-cache',
         '--media-cache-size=0',
         '--no-sandbox',
+        '--lang=en-US',
         '--disable-setuid-sandbox',
         '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
         `--proxy-server=${proxyChunk[thread]}`
