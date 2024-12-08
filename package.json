@@ -35,8 +35,9 @@
     "lodash": "^4.17.21",
     "promise.any": "^2.0.6",
     "puppeteer": "^13.0.1",
-    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-recaptcha": "^3.6.6",
-    "puppeteer-extra-plugin-stealth": "^2.4.0"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "user-agents": "^1.1.382"
   }
 }

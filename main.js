@@ -2,6 +2,7 @@ const { app, BrowserWindow, dialog } = require('electron');
 const electron = require('electron');
 const fs = require('fs-extra');
 const ipc = electron.ipcMain;
+const UserAgent = require('user-agents');
 
 const puppeteer = require('puppeteer-extra');
 // add stealth plugin and use defaults (all evasion techniques)
@@ -45,15 +46,15 @@ app.on('window-all-closed', () => {
 })
 
 const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) {
-  // puppeteer.use(
-  //   RecaptchaPlugin({
-  //     provider: {
-  //       id: '2captcha',
-  //       token: keyCaptcha
-  //     },
-  //     visualFeedback: true
-  //   })
-  // );
+  puppeteer.use(
+    RecaptchaPlugin({
+      provider: {
+        id: '2captcha',
+        token: keyCaptcha
+      }
+    })
+  );
+  let userAgent = new UserAgent({ deviceCategory: 'mobile' });
   let out = `${__dirname}\\..\\extraResources\\output.txt`;
   let promises = Array(mailPassChunk.length).fill(null);
   let browsers = Array(mailPassChunk.length).fill(null);
@@ -87,38 +88,34 @@ const run = async function (mailPassChunk, proxyChunk, keyCaptcha, keyDaisySms) 
         y: 0
       }
     }
-    let stayFocusd = "C:\\Users\\USER\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\infdcenbdoibcacogknkjleclhnjdmfh\\1.0.2_0";
     browsers[thread] = await puppeteer.launch({
       executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
       // executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: false,
       ignoreHTTPSErrors: true,
-      ignoreDefaultArgs: ['--enable-automation', '--disable-extensions'],
-      args: [`--window-size=500,600`, `--window-position=${position.x},${position.y}`,
-        `--disable-extensions-except=${stayFocusd}`, 
-        `--load-extension=${stayFocusd}`,
+      ignoreDefaultArgs: ['--enable-automation'],
+      args: [`--window-size=${userAgent.data.screenWidth},${userAgent.data.screenHeight}`, `--window-position=${position.x},${position.y}`,
         '--disable-infobars',
         '--disk-cache-size=0',
         '--ignore-certifcate-errors',
         '--ignore-certifcate-errors-spki-list',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process,SitePerProcess',
-        '--flag-switches-begin --disable-site-isolation-trials --flag-switches-end',
-        '--aggressive-cache-discard',
-        '--disable-cache',
-        '--disable-application-cache',
-        '--disable-offline-load-stale-cache',
-        '--disable-gpu-shader-disk-cache',
-        '--media-cache-size=0',
+        '--use-gl=swiftshader', 
+        '--disable-software-rasterizer',
         '--no-sandbox',
         '--lang=en-US',
         '--disable-setuid-sandbox',
-        '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"',
         `--proxy-server=${proxyChunk[thread]}`
       ],
     });
     contexts[thread] = await browsers[thread].createIncognitoBrowserContext();
     pages[thread] = await contexts[thread].newPage();
+    await pages[thread].setUserAgent(userAgent.data.userAgent);
+    await pages[thread].evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      Object.defineProperty(navigator, 'language', { get: () => 'en-US' });
+      Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+      Object.defineProperty(navigator, 'permissions', { get: () => ({ query: () => ({ state: 'granted' }) }) });
+    });
     const [mail] = mailPassChunk[thread].split("|");
     const firstName = randomFirstName();
     const lastName = randomLastName();

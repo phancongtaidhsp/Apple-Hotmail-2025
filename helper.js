@@ -155,7 +155,7 @@ const rentPhoneDaisySMS = async (apiKey) => {
         'sec-ch-ua-platform': '"Windows"',
       }
     };
-    resolve({ idDaisySMS: "104245343", phoneDaisySMS: "5167074892" });
+    resolve({ idDaisySMS: "106989382", phoneDaisySMS: "5123660160" });
     // instance.request(options)
     //   .then(function (response) {
     //     if (response?.data?.includes("ACCESS_NUMBER")) {
