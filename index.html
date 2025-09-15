@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Apple - Yahoo (2024. v1)</title>
+  <title>Apple - Hotmail (2025. v1)</title>
   <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
   <link rel="stylesheet" href="style.css">
@@ -11,20 +11,21 @@
 </head>
 
 <body>
-  <h1 class="title-app">Apple - Yahoo (2024. v1)</h1>
+  <h1 class="title-app">Apple - Hotmail (2025. v1)</h1>
   <div id="thongbao" class="alert alert-success hidden" role="alert">
     Đã chạy xong file data
   </div>
   <div class="wr">
     <button id="start" type="button" class="button btn btn-primary">Start</button>
     <button id="pause" type="button" class="button btn btn-danger">Pause</button>
+    <button id="result" class="button btn btn-info">Xuất kết quả</button>
     <div class="value">
-      <input type="input" id="filepathmail" placeholder="Đường dẫn file mail" value="E:\data\accreg.txt">
-      <input type="input" id="filepathproxy" placeholder="Đường dẫn file proxy" value="E:\data\proxy.txt">
+      <input type="text" id="filepathmail" placeholder="Đường dẫn file mail" value="E:\data\output\success.txt">
+      <input type="text" id="keynopecha" placeholder="Key nopecaptcha" value="okabyf0t8m_BLVGCZCW">
+      <input type="text" id="keyproxy" placeholder="Key tm proxy (cách nhau bằng dấu |)" value="a2b07f90caf4019ddedf4c3991a7065d">
     </div>
     <div class="value">
-      <input type="input" id="keycaptcha" placeholder="Key 2captcha" value="07d6957c3769555917e8e953d54ddcab">
-      <input type="input" id="keydaisysms" placeholder="Key daisySMS" value="71oJbp32uUpCBRrq5ILq9rectyYg3o">
+      <input class="numberinput" type="number" id="soluong" placeholder="Số luồng (nhỏ hơn 10)">
     </div>
     <div class="value">
       <div class="total">
@@ -35,11 +36,11 @@
     <div class="value">
       <div class="success">
         <span>Success: </span>
-        <span id="live">0</span>
+        <span id="success">0</span>
       </div>
       <div class="fail">
         <span>Fail: </span>
-        <span id="die">0</span>
+        <span id="fail">0</span>
       </div>
       <div class="total">
         <span>Total: </span>
@@ -47,9 +48,6 @@
       </div>
     </div>
   </div>
-  <ul class="info">
-    <li>file data format theo 'mail'|'pass'</li>
-  </ul>
   <script>
     require('./app.js');
     const electron = require('electron');
@@ -66,31 +64,32 @@
       document.getElementById(`total`).innerText = total;
     })
     ipcRenderer.on('fail', function (e, step, pause) {
-      let failStep = parseInt(document.getElementById(`die`).innerText) + step;
-      let successStep = parseInt(document.getElementById(`live`).innerText);
+      let failStep = parseInt(document.getElementById(`fail`).innerText) + step;
+      let successStep = parseInt(document.getElementById(`success`).innerText);
       let totalStep = parseInt(document.getElementById(`total`).innerText);
-      document.getElementById(`die`).innerText = failStep;
+      document.getElementById(`fail`).innerText = failStep;
       if (pause && failStep + successStep === totalStep) {
         document.getElementById('thongbao').classList.add('hidden')
         document.getElementById('start').disabled = false;
-      } else if(!pause &&failStep + successStep === totalStep) {
+      } else if (!pause && failStep + successStep === totalStep) {
         showThongBao('alert-success', 'Đã chạy hết file data')
       }
     })
     ipcRenderer.on('success', function (e, step, pause) {
-      let failStep = parseInt(document.getElementById(`die`).innerText);
-      let successStep = parseInt(document.getElementById(`live`).innerText) + step;
+      let failStep = parseInt(document.getElementById(`fail`).innerText);
+      let successStep = parseInt(document.getElementById(`success`).innerText) + step;
       let totalStep = parseInt(document.getElementById(`total`).innerText);
-      document.getElementById(`live`).innerText = successStep;
+      document.getElementById(`success`).innerText = successStep;
       if (pause && failStep + successStep === totalStep) {
         document.getElementById('thongbao').classList.add('hidden')
         document.getElementById('start').disabled = false;
-      } else if(!pause &&failStep + successStep === totalStep) {
+      } else if (!pause && failStep + successStep === totalStep) {
         showThongBao('alert-success', 'Đã chạy hết file data')
       }
     })
     ipcRenderer.on('disable', function (e, isDisable) {
       document.getElementById('start').disabled = isDisable;
+      document.getElementById('result').disabled = isDisable;
     })
     ipcRenderer.on('time', function (e, time) {
       let h, m, s
@@ -119,21 +118,24 @@
     ipcRenderer.on('checkfiles', function (e, filename) {
       showThongBao('alert-danger', `Đường dẫn file không hợp lệ: ${filename}`)
     })
+    ipcRenderer.on('failProxyKey', function (e, key) {
+      showThongBao('alert-danger', `proxy key: ${key} không hợp lệ`)
+    })
     ipcRenderer.on('pause', function (e, info, noTimeout) {
       showThongBao('alert-info', info, noTimeout)
-      let failStep = parseInt(document.getElementById(`die`).innerText);
-      let successStep = parseInt(document.getElementById(`live`).innerText);
-      let totalStep = parseInt(document.getElementById(`total`).innerText);
-      if (failStep + successStep === totalStep) {
-        document.getElementById('thongbao').classList.add('hidden')
-      } else {
-        document.getElementById('start').disabled = isDisable;
-      }
+      document.getElementById('start').disabled = isDisable;
     })
     ipcRenderer.on('loi', function (e, err, noTimeout) {
       showThongBao('alert-danger', err, noTimeout)
     })
-
+    ipcRenderer.on('result', function (e, isSuccess) {
+      if (isSuccess) {
+        showThongBao('alert-success', 'Xuất kết quả thành công')
+      }
+      else {
+        showThongBao('alert-danger', 'Xuất kết quả thất bại')
+      }
+    })
   </script>
 </body>
 
